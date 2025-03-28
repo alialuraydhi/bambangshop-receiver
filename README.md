@@ -82,18 +82,24 @@ You can install Postman via this website: https://www.postman.com/downloads/
 ## Your Reflections
 This is the place for you to write reflections:
 
-### Mandatory (Subscriber) Reflections
 
-#### Reflection Subscriber-1
+Berikut adalah versi yang telah saya parafrase dengan tetap mempertahankan makna inti:  
 
-1. Di tutorial ini, kita menggunakan `RwLock<Vec<Notification>>` untuk men-sinkronisasi akses ke daftar notifikasi. `RwLock` diperlukan karena beberapa bagian program bisa read atau modify notifikasi secara bersamaan. Dengan `RwLock`, beberapa thread bisa membaca secara bersamaan, tetapi hanya satu thread yang dapat write, sehingga bisa mencegah *race condition* dan meningkatkan performa. Jika menggunakan `Mutex<Vec<Notification>>`, setiap akses baik read atau write akan terkunci, menyebabkan contention yang tidak perlu.
+---  
 
-2. Di Java, variabel static dibagikan ke semua instance kelas dan bisa dimodifikasi secara bebas. Namun, Rust punya aturan ketat untuk mencegah race condition dan akses memori yang tidak aman. Rust mengharuskan variabel statis bersifat immutable atau synchronized. Dalam tutorial ini, kita menggunakan `lazy_static!` untuk mendefinisikan `NOTIFICATIONS` sebagai `RwLock<Vec<Notification>>`, hal ini penting untuk memastikan bahwa modifikasi tetap aman dalam *environment* multi-threading. Tanpa mekanisme ini, Rust tidak mengizinkan direct mutation pada variabel static karena adanya potensi undefined behavior.
+## **Refleksi Wajib (Subscriber)**  
 
-#### Reflection Subscriber-2
+### **Refleksi Subscriber-1**  
 
-1. Pada tutorial ini, saya mengikuti langkah-langkah yang diberikan tanpa mengeksplorasi bagian lain seperti `src/lib.rs`. Saya rasa tutorial sudah memberikan *guide* terstruktur untuk mengimplementasikan model, repository, service, dan controller. Saya mengikuti instruksi dengan tepat dan berusaha *make sure* bahwa implementasi berjalan sesuai harapan. Akan tetapi, jika memang diperlukan, saya mungkin akan mencoba secara mandiri eksplorasi file lain. (Misalnya memang disuruh di exercise, hehe) 
+1. Dalam tutorial ini, kita menggunakan `RwLock<Vec<Notification>>` untuk mengatur akses yang aman ke daftar notifikasi dalam lingkungan multi-threading. `RwLock` memungkinkan beberapa thread untuk membaca data secara bersamaan, tetapi membatasi hanya satu thread yang dapat menulis pada satu waktu. Hal ini membantu mencegah *race condition* dan meningkatkan efisiensi akses data. Jika kita menggunakan `Mutex<Vec<Notification>>`, setiap proses baca atau tulis akan dikunci, sehingga dapat memperlambat kinerja sistem karena semua akses harus menunggu giliran.  
 
-2. Observer pattern mempermudah penambahan subscriber karena publisher (Main app) tidak perlu mengetahui setiap subscriber secara langsung. Subscriber bisa subscribe notifikasi berdasarkan tipe produk tertentu, dan publisher cukup mengirimkan update saat ada event. Hal ini membuat sistem lebih fleksibel dan scalable. Namun, jika ada banyak instance Main app, kompleksitas meningkat karena perlu mekanisme koordinasi supaya tidak ada duplikasi atau notifikasi yang tidak konsisten. Tanpa *shared state management*, subscriber bisa menerima update yang berbeda. Menurut saya, salah satu solusinya adalah menggunakan *shared database* atau *message broker* untuk menyinkronkan event notifikasi antar instance.  
+2. Dalam bahasa pemrograman Java, variabel statis dapat diakses oleh semua instance dari sebuah kelas dan dapat diubah tanpa pembatasan khusus. Namun, Rust memiliki aturan ketat untuk mencegah akses memori yang tidak aman dan potensi *race condition*. Oleh karena itu, dalam tutorial ini, kita menggunakan `lazy_static!` untuk mendefinisikan `NOTIFICATIONS` sebagai `RwLock<Vec<Notification>>`, yang memungkinkan akses data secara aman dalam lingkungan multi-threading. Rust tidak mengizinkan modifikasi langsung pada variabel statis tanpa mekanisme sinkronisasi seperti ini karena dapat menyebabkan perilaku yang tidak terduga dalam eksekusi program.  
 
-3. Saya memodifikasi Postman collection agar bisa mengirim permintaan Create New Product dengan berbagai tipe produk. Hal ini memungkinkan saya menguji sistem notifikasi di tiga port berbeda (8001, 8002, 8003) dan memastikan setiap subscriber hanya menerima notifikasi untuk tipe produk yang sesuai. Dengan menjalankan beberapa instance receiver, saya bisa verifikasi kalau Observer pattern bekerja dengan baik dalam memfilter dan mengirim notifikasi. Modifikasi ini lumayan membantu untuk *simulate* real world scenario dengan banyak subscriber.
+### **Refleksi Subscriber-2**  
+
+1. Saat mengerjakan tutorial ini, saya mengikuti langkah-langkah yang diberikan tanpa terlalu banyak mengeksplorasi file lain, seperti `src/lib.rs`. Saya merasa bahwa panduan yang tersedia sudah cukup jelas dan membantu dalam memahami konsep serta implementasinya. Namun, jika ada kesempatan untuk eksplorasi lebih lanjut, saya mungkin akan mencoba memahami bagian lain dari kode untuk mendapatkan wawasan yang lebih mendalam, terutama jika diminta dalam latihan tambahan.  
+
+2. Pola desain Observer memudahkan penambahan subscriber karena publisher tidak perlu mengetahui secara langsung siapa saja yang telah berlangganan notifikasi. Subscriber dapat memilih untuk menerima notifikasi berdasarkan jenis produk tertentu, sementara publisher cukup mengirimkan pembaruan saat terjadi perubahan. Namun, ketika terdapat banyak instance dari aplikasi utama (*Main app*), tantangan baru muncul, yaitu bagaimana memastikan konsistensi notifikasi di antara semua instance. Jika tidak ada mekanisme sinkronisasi, beberapa subscriber mungkin menerima informasi yang tidak seragam. Salah satu solusi yang bisa digunakan adalah dengan menerapkan *shared database* atau menggunakan *message broker* untuk mengatur distribusi notifikasi dengan lebih baik.  
+
+3. Saya melakukan beberapa modifikasi pada koleksi Postman untuk mengirim permintaan pembuatan produk dengan berbagai jenis. Hal ini saya lakukan agar bisa menguji apakah sistem notifikasi bekerja dengan baik pada beberapa instance receiver yang berjalan di port berbeda, seperti 8001, 8002, dan 8003. Dengan cara ini, saya dapat memastikan bahwa setiap subscriber hanya menerima notifikasi untuk kategori produk yang sesuai dengan langganannya. Pengujian ini membantu saya memahami bagaimana sistem Observer bekerja dalam skenario nyata yang melibatkan banyak subscriber.  
+
